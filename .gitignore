@@ -1,0 +1,26 @@
+# Dépendances Node.js (ne jamais pousser sur GitHub)
+node_modules/
+npm-debug.log*
+
+# Fichiers système OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Variables d'environnement (données sensibles)
+.env
+.env.local
+.env.production
+
+# Fichiers de build
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Fichiers temporaires éditeur
+.vscode/settings.json
+*.swp
+*.swo

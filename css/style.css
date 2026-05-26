@@ -1,0 +1,63 @@
+/**
+ * style.css
+ * ─────────────────────────────────────────────────────────────────
+ * Styles complémentaires au HTML inline.
+ * Utilisé pour les overrides Tailwind et les animations
+ * qui ne peuvent pas être gérées en inline.
+ * ─────────────────────────────────────────────────────────────────
+ */
+
+/* ── Tailwind config étendue via @layer ─────────────────────────── */
+@layer utilities {
+    .text-gold  { color: #c6a87c; }
+    .text-cyan  { color: #00D4FF; }
+    .bg-black   { background-color: #000000; }
+    .border-gold { border-color: #c6a87c; }
+    .border-cyan { border-color: #00D4FF; }
+}
+
+/* ── Radar animation (tunnel étape 2) ──────────────────────────── */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* ── Clignotement HUD ──────────────────────────────────────────── */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+.hud-blink { animation: blink 1.2s ease-in-out infinite; }
+
+/* ── Lueur animée sur les boutons au focus ─────────────────────── */
+.btn-prestige:focus-visible {
+    outline: 1px solid #c6a87c;
+    outline-offset: 4px;
+}
+
+/* ── Transitions GSAP : les éléments partent cachés ───────────── */
+#hero-label,
+#hero-title,
+#hero-cta {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+/* ── Ligne de séparation décorative or ─────────────────────────── */
+.gold-line {
+    width: 60px;
+    height: 0.5px;
+    background: #c6a87c;
+    margin: 2rem auto;
+}
+
+/* ── Texte de chargement tunnel : monospace ─────────────────────── */
+#loading-logs p {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: rgba(0, 212, 255, 0.6);
+    margin-bottom: 4px;
+}
+#loading-logs p:last-child {
+    color: #4ade80;
+}

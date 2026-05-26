@@ -1,0 +1,23 @@
+{
+  "name": "coldwell-banker-larochelle",
+  "version": "1.0.0",
+  "description": "CRM back-end Coldwell Banker Global Luxury — La Rochelle",
+  "main": "crm-api.js",
+  "scripts": {
+    "start": "node crm-api.js",
+    "dev": "nodemon crm-api.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "author": "Coldwell Banker La Rochelle",
+  "license": "UNLICENSED",
+  "private": true
+}
