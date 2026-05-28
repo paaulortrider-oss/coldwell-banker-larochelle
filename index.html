@@ -300,13 +300,8 @@
             position: relative;
             height: 100vh;
         }
-        #section-scrubbing video {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            max-width: 80%;
-            max-height: 80vh;
-            object-fit: contain;
+        #canvas-scrubbing {
+            display: block;
         }
 
         /* Textes contextuels autour de la vidéo */
@@ -344,12 +339,9 @@
             justify-content: center;
         }
 
-        /* Canvas Three.js pour la ville */
-        #canvas-ville {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
+        /* Hologram PNG visual */
+        .holo-visual-img {
+            transition: filter 1.8s ease;
         }
 
         /* HUD Labels quartiers */
@@ -422,10 +414,24 @@
             justify-content: center;
             overflow: hidden;
         }
-        #canvas-globe {
-            position: absolute;
-            inset: 0;
-            width: 100%; height: 100%;
+        /* Globe PNG visual */
+        .globe-visual-img {
+            transition: filter 1.5s ease;
+        }
+        .globe-inner {
+            perspective: 1000px;
+        }
+        .holo-inner {
+            perspective: 1000px;
+        }
+        .scan-inner {
+            perspective: 1000px;
+        }
+        .scan-visual-img {
+            transition: filter 1.5s ease;
+        }
+        .plongee-inner {
+            background: var(--black);
         }
         .globe-stat {
             position: absolute;
@@ -768,7 +774,8 @@
     ============================================================ -->
     <div id="loader">
         <div class="loader-logo">COLDWELL <span>BANKER</span></div>
-        <div class="loader-text">Initialisation du réseau...</div>
+        <div class="loader-text" id="loader-status">Initialisation du réseau...</div>
+        <div id="loader-percent" style="font-family:'Rajdhani',monospace; font-size:2.5rem; font-weight:700; color:var(--gold); letter-spacing:0.1em; text-shadow:var(--glow-gold);">0%</div>
         <div class="loader-bar-wrap">
             <div class="loader-bar"></div>
         </div>
@@ -814,6 +821,8 @@
 
             <!-- ── SECTION 1 : HERO CINÉMATIQUE ── -->
             <section class="story-section" id="section-hero">
+                <video autoplay muted loop playsinline style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-1; opacity:0.4; filter:brightness(0.6);"
+                    src="https://res.cloudinary.com/dhfcdtyxs/video/upload/v1779901745/Create_a_perfectly_seamless_in_ixm8rz.mp4"></video>
                 <div class="hud-label mb-6" style="opacity:0;" id="hero-label">
                     46°09'N · 1°09'W · La Rochelle, Charente-Maritime
                 </div>
@@ -867,12 +876,39 @@
                 </div>
             </section>
 
-            <!-- ── SECTION 3 : VILLE HOLOGRAPHIQUE ── -->
-            <section id="section-ville" style="height: 200vh;">
-                <div style="position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+            <!-- ── SECTION 2b : SCAN 3D VILLE ── -->
+            <section id="section-scan" style="height:150vh; position:relative;">
+                <div class="scan-inner" style="position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    <img class="scan-visual-img" src="./assets/medias/photo-ville-la-rochelle-scanner.png" alt="Scan 3D La Rochelle"
+                         style="position:relative; z-index:2; max-width:75%; max-height:75vh; object-fit:contain; opacity:0; will-change:transform; filter:drop-shadow(0 0 30px rgba(0,212,255,0.25));">
+                    <div class="scan-sweep" style="position:absolute; left:0; right:0; height:3px; top:0%; background:linear-gradient(to right, transparent, var(--cyan), rgba(0,212,255,0.6), var(--cyan), transparent); z-index:5; opacity:0; pointer-events:none; box-shadow:0 0 20px rgba(0,212,255,0.4);"></div>
+                    <div class="scan-grid-overlay" style="position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0;
+                        background:
+                            linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+                        background-size: 60px 60px;"></div>
+                    <div style="position:absolute; top:3rem; left:50%; transform:translateX(-50%); text-align:center; z-index:10; opacity:0;" class="scan-title-block">
+                        <div class="hud-label mb-2" style="color:var(--cyan);">Analyse Territoriale</div>
+                        <div style="font-family:'Cinzel',serif; font-size:clamp(1rem,3vw,1.8rem); color:var(--white);">
+                            Scan <span style="color:var(--cyan);">3D</span> du Territoire
+                        </div>
+                    </div>
+                    <div style="position:absolute; bottom:3rem; left:50%; transform:translateX(-50%); z-index:10; opacity:0; font-family:'Rajdhani',monospace; font-size:10px; letter-spacing:0.3em; color:rgba(0,212,255,0.5);" class="scan-status-text">
+                        CARTOGRAPHIE URBAINE · DONNÉES DVF INTÉGRÉES
+                    </div>
+                </div>
+            </section>
 
-                    <!-- Canvas Three.js ville -->
-                    <canvas id="canvas-ville" style="position:absolute; inset:0; width:100%; height:100%;"></canvas>
+            <!-- ── SECTION 3 : VILLE HOLOGRAPHIQUE (PNG) ── -->
+            <section id="section-ville" style="height: 200vh;">
+                <div class="holo-inner" style="position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+
+                    <!-- PNG holographique de la ville -->
+                    <img class="holo-visual-img" src="./assets/medias/ville-la-rochelle-hologram.png" alt="La Rochelle hologram"
+                         style="position:relative; z-index:2; max-width:70%; max-height:70vh; object-fit:contain; opacity:0; will-change:transform; filter:drop-shadow(0 0 40px rgba(0,212,255,0.3));">
+
+                    <!-- Scan line holographique -->
+                    <div class="holo-scan-line" style="position:absolute; left:0; right:0; height:2px; top:0%; background:linear-gradient(to right, transparent, var(--cyan), transparent); z-index:5; opacity:0.4; pointer-events:none;"></div>
 
                     <!-- HUD GPS -->
                     <div class="hud-gps" id="hud-gps" style="opacity:0;">
@@ -902,7 +938,7 @@
                     </div>
 
                     <!-- Titre overlay -->
-                    <div style="position:absolute; bottom:4rem; left:50%; transform:translateX(-50%); text-align:center; z-index:10;" id="ville-title" class="hud-card" style="max-width:500px; border:none; background:transparent;">
+                    <div style="position:absolute; bottom:4rem; left:50%; transform:translateX(-50%); text-align:center; z-index:10; opacity:0; transform:translateX(-50%) translateY(30px);" id="ville-title">
                         <div class="hud-label mb-2">Marché Local</div>
                         <div class="hero-title" style="font-size:clamp(1.5rem,4vw,3rem);">
                             La Rochelle<br><span class="gold">Analyse Territoriale</span>
@@ -911,31 +947,65 @@
                 </div>
             </section>
 
-            <!-- ── SECTION 4 : GLOBE INTERNATIONAL ── -->
+            <!-- ── SECTION 4 : GLOBE INTERNATIONAL (PNG) ── -->
             <section id="section-globe" style="height: 200vh;">
-                <div style="position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                <div class="globe-inner" style="position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;">
 
-                    <canvas id="canvas-globe" style="position:absolute; inset:0; width:100%; height:100%;"></canvas>
+                    <!-- PNG du globe -->
+                    <img class="globe-visual-img" src="./assets/medias/globe-hologram.png" alt="Coldwell Banker Global Network"
+                         style="position:relative; z-index:2; max-width:55%; max-height:65vh; object-fit:contain; opacity:0; will-change:transform; filter:drop-shadow(0 0 50px rgba(198,168,124,0.3));">
+
+                    <!-- Glow pulsation -->
+                    <div class="globe-glow" style="position:absolute; width:50%; height:50%; border-radius:50%; background:radial-gradient(circle, rgba(198,168,124,0.15) 0%, transparent 70%); z-index:1; opacity:0; pointer-events:none;"></div>
 
                     <!-- Stats réseau -->
-                    <div class="globe-stat" style="top:20%; left:5%; text-align:left; z-index:10;" id="globe-stat-1">
-                        <div class="globe-stat-number">3 000</div>
+                    <div class="globe-stat" style="top:20%; left:5%; text-align:left; z-index:10; opacity:0; transform:translateY(20px);">
+                        <div class="globe-stat-number" id="globe-num-offices">0</div>
                         <div class="globe-stat-label">Agences mondiales</div>
                     </div>
-                    <div class="globe-stat" style="top:20%; right:5%; text-align:right; z-index:10;" id="globe-stat-2">
-                        <div class="globe-stat-number">49</div>
+                    <div class="globe-stat" style="top:20%; right:5%; text-align:right; z-index:10; opacity:0; transform:translateY(20px);">
+                        <div class="globe-stat-number" id="globe-num-countries">0</div>
                         <div class="globe-stat-label">Pays</div>
                     </div>
-                    <div class="globe-stat" style="bottom:20%; left:50%; transform:translateX(-50%); z-index:10;" id="globe-stat-3">
-                        <div class="globe-stat-number">118</div>
+                    <div class="globe-stat" style="bottom:20%; left:50%; transform:translateX(-50%); z-index:10; opacity:0; transform:translateY(20px);">
+                        <div class="globe-stat-number" id="globe-num-years">0</div>
                         <div class="globe-stat-label" style="font-size:9px; letter-spacing:0.3em;">ans d'excellence · depuis 1906</div>
                     </div>
 
                     <!-- Titre -->
-                    <div style="position:absolute; top:3rem; left:50%; transform:translateX(-50%); text-align:center; z-index:10;">
+                    <div class="globe-title-block" style="position:absolute; top:3rem; left:50%; transform:translateX(-50%); text-align:center; z-index:10; opacity:0; transform:translateX(-50%) translateY(20px);">
                         <div class="hud-label mb-2">Réseau CB</div>
                         <div style="font-family:'Cinzel',serif; font-size:clamp(1rem,3vw,2rem); color:var(--white);">
                             Votre bien, <span style="color:var(--gold);">visible partout</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── SECTION 4b : PLONGÉE PORT — TRANSITION CINÉMATIQUE ── -->
+            <section id="section-plongee" style="height:150vh; position:relative;">
+                <div class="plongee-inner" style="position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                    <img class="plongee-visual-img" src="./assets/medias/photo-realiste-la-rochelle.jpg" alt="Port de La Rochelle"
+                         style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; will-change:transform; transform:scale(1.15); filter:brightness(0.7) contrast(1.1);">
+                    <div class="plongee-vignette" style="position:absolute; inset:0; z-index:2; pointer-events:none;
+                        background:radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.7) 100%);"></div>
+                    <div style="position:relative; z-index:5; text-align:center; opacity:0;" class="plongee-content">
+                        <div class="hud-label mb-4" style="color:rgba(198,168,124,0.7);">Immersion Locale</div>
+                        <div style="font-family:'Cinzel',serif; font-size:clamp(1.5rem,4vw,3rem); color:var(--white); line-height:1.3; margin-bottom:1.5rem;">
+                            Le Vieux-Port,<br><span style="color:var(--gold);">cœur de ville</span>
+                        </div>
+                        <div style="width:60px; height:0.5px; background:var(--gold); margin:0 auto;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── SECTION 4c : VILLA PRESTIGE — COTES OVERLAY ── -->
+            <section id="section-final" style="height:150vh; position:relative;">
+                <div style="position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden; background:var(--black);">
+                    <div style="position:absolute; top:3rem; left:50%; transform:translateX(-50%); text-align:center; z-index:10;">
+                        <div class="hud-label mb-2" style="color:var(--gold);">Expertise Immobilière</div>
+                        <div style="font-family:'Cinzel',serif; font-size:clamp(1rem,3vw,1.8rem); color:var(--white);">
+                            Précision <span style="color:var(--gold);">architecturale</span>
                         </div>
                     </div>
                 </div>
@@ -1526,7 +1596,6 @@
     <!-- ============================================================
          SCRIPTS MODULAIRES
     ============================================================ -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="./js/app-logic.js"></script>
     <script src="./js/scene-globe.js"></script>
     <script src="./js/scene-hologram.js"></script>

@@ -1,24 +1,4 @@
-/**
- * canvas-scrubbing.js
- * ─────────────────────────────────────────────────────────────────
- * MISSION 3 : Remplacement du Video Scrubbing par Canvas + Image Sequence
- *
- * Technique : 303 frames JPEG Cloudinary pilotées par GSAP ScrollTrigger
- * sur un <canvas> HTML. Préchargement progressif, affichage fluide.
- *
- * USAGE :
- *   1. Remplacer la <video> dans #section-scrubbing par :
- *      <canvas id="canvas-scrubbing" style="max-width:80%; max-height:80vh;"></canvas>
- *   2. Charger ce script APRÈS gsap + ScrollTrigger
- *   3. Appeler initCanvasScrubbing() depuis initLoader() dans animations.js
- * ─────────────────────────────────────────────────────────────────
- */
-
 'use strict';
-
-// ═══════════════════════════════════════════════════════════════════
-//  FRAME URLS — 303 images ordonnées (Cloudinary)
-// ═══════════════════════════════════════════════════════════════════
 
 const frameUrls = [
   'https://res.cloudinary.com/dhfcdtyxs/image/upload/v1779903842/frame_0001_cna31z.jpg',
@@ -326,83 +306,89 @@ const frameUrls = [
   'https://res.cloudinary.com/dhfcdtyxs/image/upload/v1779903862/frame_0303_mtuajc.jpg',
 ];
 
-// ═══════════════════════════════════════════════════════════════════
-//  CANVAS SCRUBBING ENGINE
-// ═══════════════════════════════════════════════════════════════════
+const TOTAL_FRAMES = frameUrls.length;
+const scrubFrames = new Array(TOTAL_FRAMES);
 
-const TOTAL_FRAMES = frameUrls.length; // 303
+function preloadScrubFrames(onProgress) {
+    let loaded = 0;
+    const promises = frameUrls.map((url, index) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                scrubFrames[index] = img;
+                loaded++;
+                if (onProgress) onProgress(loaded, TOTAL_FRAMES);
+                resolve();
+            };
+            img.onerror = () => {
+                loaded++;
+                if (onProgress) onProgress(loaded, TOTAL_FRAMES);
+                resolve();
+            };
+            img.src = url;
+        });
+    });
 
-/**
- * initCanvasScrubbing()
- * Main entry point — call from animations.js initLoader()
- * Replaces the old initScrubbingSection() video-based approach.
- */
+    const batched = [];
+    const BATCH = 20;
+    for (let i = 0; i < promises.length; i += BATCH) {
+        const batch = promises.slice(i, i + BATCH);
+        if (batched.length === 0) {
+            batched.push(Promise.all(batch));
+        } else {
+            batched.push(batched[batched.length - 1].then(() => Promise.all(batch)));
+        }
+    }
+
+    return Promise.all(promises);
+}
+
 function initCanvasScrubbing() {
     const canvas = document.getElementById('canvas-scrubbing');
-    if (!canvas) {
-        console.warn('[CB-Scrub] #canvas-scrubbing not found — skipping init.');
-        return;
-    }
+    if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // ── State ────────────────────────────────────────────────────
-    const frames = new Array(TOTAL_FRAMES);  // Image cache array
-    let loadedCount = 0;
     let currentFrame = 0;
-    let canvasReady = false;
 
-    // ── On mobile: autoplay as slideshow, skip scroll scrub ──────
-    const isMobile = window.innerWidth < 768;
-
-    // ── Canvas sizing ────────────────────────────────────────────
     function resizeCanvas() {
         const container = canvas.parentElement;
         if (!container) return;
 
-        // Match container size while preserving 16:9 aspect
-        const maxW = Math.min(container.clientWidth * 0.8, 1920);
-        const maxH = container.clientHeight * 0.8;
+        const maxW = Math.min(container.clientWidth * 0.85, 1920);
+        const maxH = container.clientHeight * 0.85;
         const aspect = 16 / 9;
 
         let w = maxW;
         let h = w / aspect;
-        if (h > maxH) {
-            h = maxH;
-            w = h * aspect;
-        }
+        if (h > maxH) { h = maxH; w = h * aspect; }
 
-        canvas.width  = w;
-        canvas.height = h;
-        canvas.style.width  = w + 'px';
-        canvas.style.height = h + 'px';
+        canvas.width = Math.round(w);
+        canvas.height = Math.round(h);
+        canvas.style.width = canvas.width + 'px';
+        canvas.style.height = canvas.height + 'px';
 
-        // Redraw current frame after resize
         drawFrame(currentFrame);
     }
 
-    // ── Frame drawing ────────────────────────────────────────────
     function drawFrame(index) {
-        if (!frames[index] || !frames[index].complete) return;
+        const img = scrubFrames[index];
+        if (!img) return;
 
-        const img = frames[index];
-        const cw  = canvas.width;
-        const ch  = canvas.height;
-
-        // Cover-fit the image to the canvas
-        const imgAspect    = img.naturalWidth / img.naturalHeight;
+        const cw = canvas.width;
+        const ch = canvas.height;
+        const imgAspect = img.naturalWidth / img.naturalHeight;
         const canvasAspect = cw / ch;
 
         let sx, sy, sw, sh;
         if (imgAspect > canvasAspect) {
-            // Image wider than canvas — crop sides
             sh = img.naturalHeight;
             sw = sh * canvasAspect;
             sx = (img.naturalWidth - sw) / 2;
             sy = 0;
         } else {
-            // Image taller — crop top/bottom
             sw = img.naturalWidth;
             sh = sw / canvasAspect;
             sx = 0;
@@ -413,139 +399,47 @@ function initCanvasScrubbing() {
         ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
     }
 
-    // ── Preloading strategy ──────────────────────────────────────
-    // Phase 1: Preload critical frames (every 10th) for instant feedback
-    // Phase 2: Fill in remaining frames in background
-
-    function preloadFrame(index) {
-        return new Promise((resolve) => {
-            if (frames[index]) { resolve(); return; }
-
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                frames[index] = img;
-                loadedCount++;
-
-                // Draw first frame as soon as it's ready
-                if (index === 0 && !canvasReady) {
-                    canvasReady = true;
-                    resizeCanvas();
-                    drawFrame(0);
-                }
-
-                resolve();
-            };
-            img.onerror = () => {
-                console.warn(`[CB-Scrub] Failed to load frame ${index}`);
-                resolve();
-            };
-            img.src = frameUrls[index];
-        });
+    if (window.innerWidth < 768) {
+        resizeCanvas();
+        let mobileFrame = 0;
+        setInterval(() => {
+            mobileFrame = (mobileFrame + 1) % TOTAL_FRAMES;
+            if (scrubFrames[mobileFrame]) {
+                currentFrame = mobileFrame;
+                drawFrame(currentFrame);
+            }
+        }, 42);
+        return;
     }
 
-    async function preloadAllFrames() {
-        // Phase 1: Critical frames (every 10th = ~30 images for instant scrub)
-        const criticalIndices = [];
-        for (let i = 0; i < TOTAL_FRAMES; i += 10) {
-            criticalIndices.push(i);
-        }
-        // Always include first and last
-        if (!criticalIndices.includes(0)) criticalIndices.unshift(0);
-        if (!criticalIndices.includes(TOTAL_FRAMES - 1)) criticalIndices.push(TOTAL_FRAMES - 1);
+    const scrubObj = { frame: 0 };
 
-        // Load critical frames in parallel (batches of 6)
-        for (let b = 0; b < criticalIndices.length; b += 6) {
-            const batch = criticalIndices.slice(b, b + 6);
-            await Promise.all(batch.map(i => preloadFrame(i)));
-        }
-
-        // Phase 2: Fill in remaining frames (batches of 8, slight delay between)
-        const remaining = [];
-        for (let i = 0; i < TOTAL_FRAMES; i++) {
-            if (!frames[i]) remaining.push(i);
-        }
-
-        for (let b = 0; b < remaining.length; b += 8) {
-            const batch = remaining.slice(b, b + 8);
-            await Promise.all(batch.map(i => preloadFrame(i)));
-            // Yield to main thread between batches
-            await new Promise(r => setTimeout(r, 16));
-        }
-
-        console.log(`[CB-Scrub] All ${loadedCount}/${TOTAL_FRAMES} frames loaded.`);
-    }
-
-    // ── Find nearest loaded frame ────────────────────────────────
-    function getNearestLoadedFrame(targetIndex) {
-        if (frames[targetIndex]) return targetIndex;
-
-        // Search outward from target
-        for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
-            const below = targetIndex - offset;
-            const above = targetIndex + offset;
-            if (below >= 0 && frames[below]) return below;
-            if (above < TOTAL_FRAMES && frames[above]) return above;
-        }
-        return 0;
-    }
-
-    // ── ScrollTrigger binding ────────────────────────────────────
-    function setupScrollScrub() {
-        if (isMobile) {
-            // Mobile: auto-play at 24fps-ish as a looping slideshow
-            let mobileFrame = 0;
-            setInterval(() => {
-                mobileFrame = (mobileFrame + 1) % TOTAL_FRAMES;
-                const nearest = getNearestLoadedFrame(mobileFrame);
-                if (nearest !== currentFrame) {
-                    currentFrame = nearest;
+    gsap.to(scrubObj, {
+        frame: TOTAL_FRAMES - 1,
+        snap: 'frame',
+        ease: 'none',
+        scrollTrigger: {
+            trigger: '#section-scrubbing',
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 0.3,
+            onUpdate: (self) => {
+                const target = Math.round(scrubObj.frame);
+                if (target !== currentFrame && scrubFrames[target]) {
+                    currentFrame = target;
                     drawFrame(currentFrame);
                 }
-            }, 42); // ~24fps
-            return;
-        }
-
-        // Desktop: GSAP ScrollTrigger scrub
-        const scrubObj = { frame: 0 };
-
-        gsap.to(scrubObj, {
-            frame: TOTAL_FRAMES - 1,
-            snap: 'frame',  // Snap to integer frame indices
-            ease: 'none',
-            scrollTrigger: {
-                trigger: '#section-scrubbing',
-                start: 'top top',
-                end: 'bottom bottom',
-                scrub: 0.5,  // Slight lag for smooth feel
-                onUpdate: (self) => {
-                    const targetFrame = Math.round(scrubObj.frame);
-                    const nearest = getNearestLoadedFrame(targetFrame);
-
-                    if (nearest !== currentFrame) {
-                        currentFrame = nearest;
-                        drawFrame(currentFrame);
-                    }
-
-                    // Update contextual scrub texts
-                    if (typeof updateScrubTexts === 'function') {
-                        updateScrubTexts(self.progress);
-                    }
+                if (typeof updateScrubTexts === 'function') {
+                    updateScrubTexts(self.progress);
                 }
             }
-        });
-    }
-
-    // ── Resize handler ───────────────────────────────────────────
-    window.addEventListener('resize', () => {
-        resizeCanvas();
+        }
     });
 
-    // ── Launch ───────────────────────────────────────────────────
     resizeCanvas();
-    preloadAllFrames();
-    setupScrollScrub();
+    drawFrame(0);
+    window.addEventListener('resize', resizeCanvas);
 }
 
-// Expose globally so animations.js can call it
+window.preloadScrubFrames = preloadScrubFrames;
 window.initCanvasScrubbing = initCanvasScrubbing;
