@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/color-segregation.css">
 
     <!-- ============================================================
          CDN SCRIPTS (ordre impératif)
@@ -838,15 +839,8 @@
                 <!-- Zone épinglée pendant le scroll -->
                 <div id="scrubbing-pin" style="position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; overflow:hidden;">
 
-                    <!-- Vidéo au centre -->
-                    <video
-                        id="video-demembrement"
-                        src="./assets/medias/maison-eclatee.mp4"
-                        muted
-                        playsinline
-                        preload="auto"
-                        style="max-width:70%; max-height:75vh; object-fit:contain;"
-                    ></video>
+                    <!-- Canvas scrubbing (remplace la vidéo) -->
+                    <canvas id="canvas-scrubbing" style="max-width:80%; max-height:80vh;"></canvas>
 
                     <!-- Texte GAUCHE -->
                     <div class="scrub-text left" id="scrub-left-1">
@@ -1531,16 +1525,16 @@
 
     <!-- ============================================================
          SCRIPTS MODULAIRES
-         Ordre : 1. Logique app  2. Animations  3. Scènes 3D
     ============================================================ -->
-
-    <!-- Module 1 : Logique principale (vues, tunnel, CRM) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="./js/app-logic.js"></script>
-
-    <!-- Module 2 : Animations GSAP + Lenis -->
+    <script src="./js/scene-globe.js"></script>
+    <script src="./js/scene-hologram.js"></script>
+    <script src="./js/shader-parallax.js"></script>
+    <script src="./js/cotes-overlay.js"></script>
+    <script src="./js/storyboard.js"></script>
+    <script src="./js/canvas-scrubbing.js"></script>
     <script src="./js/animations.js"></script>
-
-    <!-- Module 3 : Scènes WebGL Three.js -->
     <script src="./js/three-scenes.js"></script>
 
 </body>

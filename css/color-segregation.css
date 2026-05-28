@@ -1,0 +1,185 @@
+/**
+ * color-segregation.css
+ * ─────────────────────────────────────────────────────────────────
+ * MISSION 1 : Ségrégation stricte des couleurs typographiques
+ *
+ * RÈGLE ABSOLUE :
+ *   ▸ Prestige (Présentation, Marque, Titres)  → Blanc + Or (#c6a87c)
+ *   ▸ Tech/Data (Estimation, Vendre, Acheter)   → Blanc + Cyan (#00D4FF)
+ *
+ * USAGE :
+ *   <h1 class="typo-prestige">Coldwell Banker</h1>
+ *   <p class="typo-prestige-sub">Votre consultant</p>
+ *   <h2 class="typo-tech">Analyse Territoriale</h2>
+ *   <span class="typo-tech-accent">4 800 €/m²</span>
+ * ─────────────────────────────────────────────────────────────────
+ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   CATÉGORIE A — PRESTIGE / PRÉSENTATION
+   Contextes : Hero, Iris, Profil, Contact, Nav brand, CTA principaux
+   Palette : Blanc (#ffffff) + Or (#c6a87c)
+═══════════════════════════════════════════════════════════════════ */
+
+/* Titre prestige principal (Cinzel) */
+.typo-prestige {
+    font-family: 'Cinzel', serif;
+    color: #ffffff;
+}
+
+/* Accent or dans les titres prestige */
+.typo-prestige .accent,
+.typo-prestige-accent {
+    color: #c6a87c;
+}
+
+/* Sous-titre prestige (Rajdhani) */
+.typo-prestige-sub {
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Label prestige (petits textes majuscules) */
+.typo-prestige-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(198, 168, 124, 0.6);
+}
+
+/* Bouton prestige : fond or, texte noir */
+.typo-prestige-cta {
+    font-family: 'Rajdhani', sans-serif;
+    color: #000000;
+    background-color: #c6a87c;
+}
+
+/* Citation prestige (Iris) */
+.typo-prestige-quote {
+    font-family: 'Cinzel', serif;
+    color: #ffffff;
+}
+.typo-prestige-quote em,
+.typo-prestige-quote .accent {
+    color: #c6a87c;
+    font-style: normal;
+}
+
+/* Séparateur prestige */
+.typo-prestige-divider {
+    width: 60px;
+    height: 0.5px;
+    background: #c6a87c;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   CATÉGORIE B — TECH / ANALYTIQUE / DATA
+   Contextes : Estimation, Vendre, Acheter, Globe stats, Ville HUD,
+               Tunnel "Le Prisme CB", prix/m², données DVF
+   Palette : Blanc (#ffffff) + Cyan (#00D4FF)
+═══════════════════════════════════════════════════════════════════ */
+
+/* Titre technique (Cinzel mais accent cyan) */
+.typo-tech {
+    font-family: 'Cinzel', serif;
+    color: #ffffff;
+}
+
+/* Accent cyan dans les titres tech */
+.typo-tech .accent,
+.typo-tech-accent {
+    color: #00D4FF;
+}
+
+/* Sous-titre tech */
+.typo-tech-sub {
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Label HUD (GPS, coordonnées, étiquettes scan) */
+.typo-tech-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(0, 212, 255, 0.7);
+}
+
+/* Données numériques (prix, stats) */
+.typo-tech-data {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    color: #00D4FF;
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+}
+
+/* Données numériques de valeur (montant final estimation) */
+.typo-tech-value {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: #00D4FF;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+}
+
+/* Bouton technique (bordure cyan) */
+.typo-tech-cta {
+    font-family: 'Rajdhani', sans-serif;
+    color: #00D4FF;
+    border-color: #00D4FF;
+    background: transparent;
+}
+.typo-tech-cta:hover {
+    background: rgba(0, 212, 255, 0.08);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+/* Séparateur technique */
+.typo-tech-divider {
+    width: 60px;
+    height: 0.5px;
+    background: #00D4FF;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   OVERRIDE CONTEXTUELS — APPLICATION PAR SECTION
+   Applique automatiquement la bonne palette selon la section
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Sections PRESTIGE (Or) ─────────────────────────────────────── */
+#section-hero .hud-label        { color: rgba(198, 168, 124, 0.7); }
+#section-hero .hero-title .gold { color: #c6a87c; }
+#section-iris .hud-label        { color: rgba(198, 168, 124, 0.6); }
+#view-profil .hud-label         { color: rgba(198, 168, 124, 0.6); }
+#view-contact .section-title .gold { color: #c6a87c; }
+#view-international .section-title .gold { color: #c6a87c; }
+
+/* ── Sections TECH (Cyan) ───────────────────────────────────────── */
+#section-hero .hero-title .cyan { color: #00D4FF; }
+#section-ville .hud-label       { color: rgba(0, 212, 255, 0.7); }
+#section-ville .hud-marker-label { color: #00D4FF; }
+#section-ville .hud-marker-data { color: #00D4FF; }
+#section-globe .hud-label       { color: rgba(0, 212, 255, 0.7); }
+#section-globe .globe-stat-number { color: #00D4FF; text-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+#section-scrubbing .scrub-text h3 { color: #00D4FF; }
+
+/* ── Pages TECH (Vendre, Acheter, Estimer) ─────────────────────── */
+#view-vendre .hud-label         { color: rgba(0, 212, 255, 0.7); }
+#view-vendre .section-title .gold { color: #00D4FF; }
+#view-vendre .content-card .hud-label { color: #00D4FF; }
+
+#view-acheter .hud-label        { color: rgba(0, 212, 255, 0.7); }
+#view-acheter .section-title .gold { color: #00D4FF; }
+
+#view-estimer .hud-label        { color: rgba(0, 212, 255, 0.7); }
+#view-estimer .section-title .gold { color: #00D4FF; }
+
+/* ── Tunnel d'estimation (Tech/Cyan exclusif) ──────────────────── */
+#view-estimation .tunnel-step .hud-label { color: rgba(0, 212, 255, 0.7); }
+#view-estimation #step-7 .hud-label { color: #c6a87c; } /* Exception: dernière étape = prestige */
+#view-estimation #tunnel-result { color: #00D4FF; text-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }

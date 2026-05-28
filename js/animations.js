@@ -36,9 +36,7 @@ function initLoader() {
             loader.style.display = 'none';
             initLenis();
             initHeroAnimations();
-            initScrubbingSection();
-            initVilleSection();
-            initGlobeSection();
+            initStoryboard();
             initIrisSection();
         }
     });
